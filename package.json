@@ -8,7 +8,8 @@
     "dev": "next dev",
     "postinstall": "prisma generate",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "trigger": "npx @trigger.dev/cli@latest dev"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.2",
@@ -60,7 +61,10 @@
     "superjson": "^1.13.1",
     "tailwind-merge": "^1.14.0",
     "tailwindcss-animate": "^1.0.7",
-    "zod": "^3.22.4"
+    "zod": "^3.22.4",
+    "@trigger.dev/sdk": "^2.1.9",
+    "@trigger.dev/nextjs": "^2.1.9",
+    "@trigger.dev/react": "^2.1.9"
   },
   "devDependencies": {
     "@types/eslint": "^8.44.2",
@@ -82,5 +86,8 @@
   "ct3aMetadata": {
     "initVersion": "7.21.0"
   },
-  "packageManager": "npm@8.5.5"
+  "packageManager": "npm@8.5.5",
+  "trigger.dev": {
+    "endpointId": "combat-training-ce3L"
+  }
 }
