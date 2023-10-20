@@ -33,8 +33,11 @@ export const env = createEnv({
     DISCORD_CLIENT_SECRET: z.string(),
     TRIGGER_API_KEY: z.string(),
     TRIGGER_API_URL: z.string(),
+    MINIO_ENDOINT: z.string(),
+    MINIO_PORT: z.coerce.number(),
+    MINIO_ACCESS_KEY: z.string(),
+    MINIO_SECRET_KEY: z.string(),
   },
-
   /**
    * Specify your client-side environment variables schema here. This way you can ensure the app
    * isn't built with invalid env vars. To expose them to the client, prefix them with
@@ -58,6 +61,10 @@ export const env = createEnv({
     TRIGGER_API_KEY: process.env.TRIGGER_API_KEY,
     TRIGGER_API_URL: process.env.TRIGGER_API_URL,
     NEXT_PUBLIC_TRIGGER_PUBLIC_API_KEY: process.env.NEXT_PUBLIC_TRIGGER_PUBLIC_API_KEY,
+    MINIO_ENDOINT: process.env.MINIO_ENDOINT,
+    MINIO_PORT: process.env.MINIO_PORT,
+    MINIO_ACCESS_KEY: process.env.MINIO_ACCESS_KEY,
+    MINIO_SECRET_KEY: process.env.MINIO_SECRET_KEY,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

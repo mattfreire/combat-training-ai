@@ -5,13 +5,20 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
+import { client } from "~/trigger";
 
-export const exampleRouter = createTRPCRouter({
-  hello: publicProcedure
-    .input(z.object({ text: z.string() }))
-    .query(({ input }) => {
+
+export const repoRouter = createTRPCRouter({
+  create: publicProcedure
+    .input(z.object({ repoUrl: z.string() }))
+    .mutation(async ({ input }) => {
+      await client.sendEvent({
+        name: "repo.create",
+        payload: { repoUrl: input.repoUrl },
+      });
+
       return {
-        greeting: `Hello ${input.text}`,
+        status: "ok",
       };
     }),
 
