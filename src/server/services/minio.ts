@@ -32,7 +32,7 @@ export const minioService = {
       return minioClient.fPutObject(bucketName, fileName, filePath, metaData)
     }))
   },
-  async uploadFolder(sourceFolder: string, bucketName: string, prefix = '') {
+  async uploadFolder(sourceFolder: string, bucketName: string, prefix: string) {
     const files = fs.readdirSync(sourceFolder);
   
     for (const file of files) {
@@ -42,8 +42,7 @@ export const minioService = {
       if (stats.isDirectory()) {
         await this.uploadFolder(filePath, bucketName, path.join(prefix, file));
       } else {
-        const objectName = path.join(prefix, file);
-  
+        const objectName = path.join(prefix, path.relative(sourceFolder, filePath));
         try {
           await this.uploadFile(bucketName, filePath, objectName)
           console.log(`Uploaded: ${objectName}`);
@@ -52,6 +51,28 @@ export const minioService = {
         }
       }
     }
+  },
+  getAllFilePaths(sourceFolder: string, prefix: string): string[] {
+    const files = fs.readdirSync(sourceFolder);
+  
+    const allFilePaths = files.map((file) => {
+      const filePath = path.join(sourceFolder, file);
+      const stats = fs.statSync(filePath);
+  
+      if (stats.isDirectory()) {
+        return this.getAllFilePaths(filePath, path.join(prefix, file));
+      } else {
+        return filePath
+      }
+    })
+
+    return allFilePaths.flat()
+  },
+  readFileLocal(filePath: string) {
+    return fs.readFileSync(filePath)
+  },
+  async readFile(bucketName: string, fileName: string) {
+    return await minioClient.getObject(bucketName, fileName)
   },
   printFiles(bucketName: string) {
     const stream = minioClient.listObjectsV2(bucketName, '', true);

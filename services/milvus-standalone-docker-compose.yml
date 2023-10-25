@@ -22,8 +22,8 @@ services:
     container_name: milvus-minio
     image: minio/minio:RELEASE.2023-03-20T20-16-18Z
     environment:
-      MINIO_ACCESS_KEY: minioadmin
-      MINIO_SECRET_KEY: minioadmin
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
     ports:
       - "9001:9001"
       - "9000:9000"
@@ -57,6 +57,16 @@ services:
     depends_on:
       - "etcd"
       - "minio"
+
+  attu:
+   container_name: attu
+   image: zilliz/attu:v2.2.7
+   environment:
+     MILVUS_URL: milvus-standalone:19530
+   ports:
+     - "8000:3000"
+   depends_on:
+     - "standalone"
 
 networks:
   default:

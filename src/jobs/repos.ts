@@ -1,4 +1,6 @@
 import { eventTrigger } from "@trigger.dev/sdk";
+import { z } from "zod";
+import { embeddingService } from "~/server/services/embedding";
 import { gitService } from "~/server/services/git";
 import { minioService } from "~/server/services/minio";
 import { client } from "~/trigger";
@@ -13,23 +15,59 @@ client.defineJob({
   // This is triggered by an event using eventTrigger. You can also trigger Jobs with webhooks, on schedules, and more: https://trigger.dev/docs/documentation/concepts/triggers/introduction
   trigger: eventTrigger({
     name: "repo.create",
+    schema: z.object({
+      repoUrl: z.string(),
+    })
   }),
   run: async (payload, io, ctx) => {
-    // This logs a message to the console
-    const payloadData = payload as { 
-      repoUrl: string
-    }
-    await io.logger.info("Clone repo: ");
-    
-    const { path } = await gitService.cloneRepo(payloadData.repoUrl);
+    const collectionName = "repos"
+    // await embeddingService.createRepoCollection(collectionName)
+    // await embeddingService.createIndex(collectionName)
 
+    await io.logger.info("Clone repo: ");
+    const { path, sourceFolderName } = await gitService.cloneRepo(payload.repoUrl);
     await io.logger.info(`Completed cloning repo to ${path}`);
 
     const bucketName = "repos"
-    await minioService.uploadFolder(path, bucketName);
-    
+    await minioService.uploadFolder(path, bucketName, sourceFolderName);
     await io.logger.info(`Completed uploading repo to MinIO bucket ${bucketName}`);
 
-    const files = minioService.printFiles('repos');
+    // await embeddingService.createPartition(collectionName, sourceFolderName)
+    // await io.logger.info(`Completed creating partition ${sourceFolderName}`);
+
+    await io.logger.info(`Getting all file paths from ${path}`);
+    const filePaths = minioService.getAllFilePaths(path, sourceFolderName)
+    await io.logger.info(`Completed getting all file paths`);
+
+    const fileContents = filePaths.map((filePath) => {
+      const fileContent = minioService.readFileLocal(filePath)
+      return fileContent.toString()
+    })
+
+    const rows = []
+    for (const fileContent of fileContents) {
+      const chunks = embeddingService.chunkText(fileContent, 900)
+      for (const chunk of chunks) {
+        const embedding = await embeddingService.createEmbedding(chunk)
+        // see here: https://milvus.io/docs/bulk_insert.md#2-Insert-entities
+        rows.push({
+          vector: embedding,
+          repo_id: 1,  // map to the ID in the repo table
+          file_id: 1,  // map to the ID in the file table
+          content: "example",
+          // content: chunk,  // always errors out that the content is too long
+          metadata: {}
+        })
+      }
+    }
+
+    const response = await embeddingService.insert(collectionName, rows)
+    if (parseInt(response.insert_cnt) !== rows.length) {
+      await io.logger.error(`Failed to insert all rows into collection ${collectionName}`);
+      await io.logger.info(`Response: ${JSON.stringify(response)}`);
+      return
+    }
+    
+    await io.logger.info(`Completed uploading repo to MinIO bucket ${bucketName}`);
   },
 });
