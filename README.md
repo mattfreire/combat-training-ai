@@ -4,7 +4,7 @@
 </p>
 
 <p align="center">
-    *The Developer's Dojo: Mastering software development with AI*
+    The Developer's Dojo: Mastering software development with AI
 </p>
 
 ## Simple and easy to use
