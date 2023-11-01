@@ -1,28 +1,19 @@
-# Create T3 App
+<h1 align="center">Combat Training</h1>
+<p align="center">
+    <a href="https://twitter.com/mattfreire"><img src="https://badgen.net/badge/twitter/@mattfreire/1DA1F2?icon&label" /></a>
+</p>
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+<p align="center">
+    *The Developer's Dojo: Mastering software development with AI*
+</p>
 
-## What's next? How do I make an app with this?
+## Simple and easy to use
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+Combat Training aims to provide an effective learning experience for software developers. It's aimed at mid-to-senior level developers looking to improve their skills.
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
-
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
-
-## Learn More
-
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
-
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
-
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
-
-## How do I deploy this?
-
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+## Combat Training Todos
+- Dojo: An environment for exploring a repository's files and prompting AI for insight
+- Improved file embeddings. Start leveraging Milvus' built-in file uploading
+- Write tests
+- Deploy on a domain and make it accessible
+- Self-hostable docs
