@@ -7,15 +7,6 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Example {
-    id        Int      @id @default(autoincrement())
-    name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    @@index([name])
-}
-
 // Necessary for Next auth
 model Account {
     id                String  @id @default(cuid())
@@ -59,4 +50,24 @@ model VerificationToken {
     expires    DateTime
 
     @@unique([identifier, token])
+}
+
+model Repository {
+    id        Int      @id @default(autoincrement())
+    name      String
+    url       String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    files     File[]
+
+    @@index([name])
+}
+
+model File {
+    id     Int        @id @default(autoincrement())
+    url    String // to MinIO
+    repoId Int
+    repo   Repository @relation(fields: [repoId], references: [id], onDelete: Cascade)
+
+    @@index([repoId])
 }

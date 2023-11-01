@@ -1,5 +1,6 @@
 import { eventTrigger } from "@trigger.dev/sdk";
 import { z } from "zod";
+import { db } from "~/server/db";
 import { embeddingService } from "~/server/services/embedding";
 import { gitService } from "~/server/services/git";
 import { minioService } from "~/server/services/minio";
@@ -17,18 +18,35 @@ client.defineJob({
     name: "repo.create",
     schema: z.object({
       repoUrl: z.string(),
+      repoId: z.number(),
     })
   }),
   run: async (payload, io, ctx) => {
+
+    const repository = await db.repository.findFirstOrThrow({
+      where: {
+        id: payload.repoId
+      }
+    })
+
     const collectionName = "repos"
-    // await embeddingService.createRepoCollection(collectionName)
-    // await embeddingService.createIndex(collectionName)
+    try {
+      await embeddingService.createRepoCollection(collectionName)
+      await embeddingService.createIndex(collectionName)
+    } catch (e) {
+      // collection already exists
+    }
 
     await io.logger.info("Clone repo: ");
     const { path, sourceFolderName } = await gitService.cloneRepo(payload.repoUrl);
     await io.logger.info(`Completed cloning repo to ${path}`);
 
     const bucketName = "repos"
+    try {
+      await minioService.createBucket(bucketName);
+    } catch (e) {
+      // bucket already exists
+    }
     await minioService.uploadFolder(path, bucketName, sourceFolderName);
     await io.logger.info(`Completed uploading repo to MinIO bucket ${bucketName}`);
 
@@ -39,14 +57,26 @@ client.defineJob({
     const filePaths = minioService.getAllFilePaths(path, sourceFolderName)
     await io.logger.info(`Completed getting all file paths`);
 
-    const fileContents = filePaths.map((filePath) => {
+    const fileObjs = filePaths.map((filePath) => {
       const fileContent = minioService.readFileLocal(filePath)
-      return fileContent.toString()
+      return {
+        filePath,
+        fileContent: fileContent.toString()
+      }
+    })
+
+    await db.file.createMany({
+      data: fileObjs.map((fileObj) => {
+        return {
+          url: fileObj.filePath,
+          repoId: repository.id
+        }
+      })
     })
 
     const rows = []
-    for (const fileContent of fileContents) {
-      const chunks = embeddingService.chunkText(fileContent, 900)
+    for (const fileObj of fileObjs) {
+      const chunks = embeddingService.chunkText(fileObj.fileContent, 900)
       for (const chunk of chunks) {
         const embedding = await embeddingService.createEmbedding(chunk)
         // see here: https://milvus.io/docs/bulk_insert.md#2-Insert-entities
