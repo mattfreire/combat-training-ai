@@ -41,7 +41,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 
-services/volumes
+volumes
 
 .vscode
 

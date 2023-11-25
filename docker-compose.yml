@@ -1,6 +1,19 @@
 version: '3.5'
 
 services:
+  postgres:
+    image: postgres:16
+    container_name: combat_training_postgres
+    volumes:
+      - local_postgres_data:/var/lib/postgresql/data:Z
+      - local_postgres_data_backups:/backups:z
+    environment:
+      POSTGRES_USER: combat_training_user
+      POSTGRES_PASSWORD: combat_training_password
+      POSTGRES_DB: combat_training
+    ports:
+      - '54301:5432'
+
   etcd:
     container_name: milvus-etcd
     image: quay.io/coreos/etcd:v3.5.5
@@ -13,7 +26,7 @@ services:
       - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/etcd:/etcd
     command: etcd -advertise-client-urls=http://127.0.0.1:2379 -listen-client-urls http://0.0.0.0:2379 --data-dir /etcd
     healthcheck:
-      test: ["CMD", "etcdctl", "endpoint", "health"]
+      test: [ "CMD", "etcdctl", "endpoint", "health" ]
       interval: 30s
       timeout: 20s
       retries: 3
@@ -31,7 +44,13 @@ services:
       - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/minio:/minio_data
     command: minio server /minio_data --console-address ":9001"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      test:
+        [
+          "CMD",
+          "curl",
+          "-f",
+          "http://localhost:9000/minio/health/live"
+        ]
       interval: 30s
       timeout: 20s
       retries: 3
@@ -39,14 +58,14 @@ services:
   standalone:
     container_name: milvus-standalone
     image: milvusdb/milvus:v2.3.1
-    command: ["milvus", "run", "standalone"]
+    command: [ "milvus", "run", "standalone" ]
     environment:
       ETCD_ENDPOINTS: etcd:2379
       MINIO_ADDRESS: minio:9000
     volumes:
       - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/milvus:/var/lib/milvus
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9091/healthz"]
+      test: [ "CMD", "curl", "-f", "http://localhost:9091/healthz" ]
       interval: 30s
       start_period: 90s
       timeout: 20s
@@ -59,15 +78,19 @@ services:
       - "minio"
 
   attu:
-   container_name: attu
-   image: zilliz/attu:v2.2.7
-   environment:
-     MILVUS_URL: milvus-standalone:19530
-   ports:
-     - "8000:3000"
-   depends_on:
-     - "standalone"
+    container_name: attu
+    image: zilliz/attu:v2.2.7
+    environment:
+      MILVUS_URL: milvus-standalone:19530
+    ports:
+      - "8888:3000"
+    depends_on:
+      - "standalone"
 
 networks:
   default:
     name: milvus
+
+volumes:
+  local_postgres_data: {}
+  local_postgres_data_backups: {}
