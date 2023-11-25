@@ -29,3 +29,24 @@ export function AddRepoButton() {
     </Dialog>
   );
 }
+export function AddRepoDialog({
+  isOpen,
+  onIsOpenChange,
+}: {
+  isOpen: boolean;
+  onIsOpenChange: (isOpen: boolean) => void;
+}) {
+  return (
+    <Dialog open={isOpen} onOpenChange={onIsOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Add a Repository</DialogTitle>
+          <DialogDescription>
+            Copy and paste the repository URL to import.
+          </DialogDescription>
+        </DialogHeader>
+        <AddRepoForm onIsOpenChange={onIsOpenChange} />
+      </DialogContent>
+    </Dialog>
+  );
+}
