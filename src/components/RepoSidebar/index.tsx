@@ -2,6 +2,7 @@ import { cn } from "~/lib/utils";
 import { Button } from "../ui/button";
 import { type File, type Repository } from "@prisma/client";
 import { api } from "~/utils/api";
+import { ScrollArea } from "../ui/scroll-area";
 
 export type RepoSidebarProps = {
   repo: Repository;
