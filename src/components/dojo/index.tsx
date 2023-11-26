@@ -1,27 +1,19 @@
-import Image from "next/image";
 import { CounterClockwiseClockIcon } from "@radix-ui/react-icons";
 
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "../ui/hover-card";
-import { Label } from "../ui/label";
-import { Separator } from "../ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Textarea } from "../ui/textarea";
 
 import { Button } from "../ui/button";
 import { api } from "~/utils/api";
-import { RepoSelector } from "./_components/preset-selector";
-import { Menu } from "./_components/menu";
+import { RepoSelector } from "./components/preset-selector";
+import { Menu } from "./components/menu";
 import { RepoSidebar } from "../RepoSidebar";
-import { useRepo } from "~/context/repo";
+import { useDojo } from "~/context/repo";
 import { ScrollArea } from "../ui/scroll-area";
+import { FileViewer } from "./containers/FileViewer";
 
-export function Layout() {
+export function Dojo() {
   const { data: repos, isLoading } = api.repo.getAll.useQuery();
-  const { repo } = useRepo();
+  const { repo } = useDojo();
   return (
     <div className="flex flex-1 flex-col">
       <div className="hidden h-full flex-col md:flex">
@@ -55,10 +47,7 @@ export function Layout() {
                         <RepoSidebar repo={repo} />
                       </ScrollArea>
                     )}
-                    <Textarea
-                      placeholder="Write a tagline for an ice cream shop"
-                      className="h-full flex-1 flex-col p-4"
-                    />
+                    <FileViewer />
                   </div>
                   <div className="flex items-center space-x-2">
                     <Button>Submit</Button>

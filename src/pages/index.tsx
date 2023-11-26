@@ -1,6 +1,6 @@
 import { type Metadata } from "next";
 import Head from "next/head";
-import { Layout } from "~/components/layout";
+import { Dojo } from "~/components/dojo";
 
 export const metadata: Metadata = {
   title: "Combat Training",
@@ -15,7 +15,7 @@ export default function Home() {
         <meta name="description" content="Training for combat" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Layout />
+      <Dojo />
     </>
   );
 }

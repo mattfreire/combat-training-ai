@@ -64,10 +64,12 @@ model Repository {
 }
 
 model File {
-    id     Int        @id @default(autoincrement())
-    url    String // to MinIO
-    repoId Int
-    repo   Repository @relation(fields: [repoId], references: [id], onDelete: Cascade)
+    id           Int        @id @default(autoincrement())
+    name         String
+    relativePath String // including filename
+    url          String // to MinIO
+    repoId       Int
+    repo         Repository @relation(fields: [repoId], references: [id], onDelete: Cascade)
 
     @@index([repoId])
 }

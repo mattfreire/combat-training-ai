@@ -19,7 +19,7 @@ import {
   CommandInput,
   CommandItem,
 } from "~/components/ui/command";
-import { useRepo } from "~/context/repo";
+import { useDojo } from "~/context/repo";
 
 interface RepoSelectorProps extends PopoverProps {
   repos: Repository[];
@@ -31,7 +31,7 @@ export function RepoSelector({ repos, ...props }: RepoSelectorProps) {
     repo: selectedRepo,
     setRepo: setSelectedRepo,
     openAddRepoDialog,
-  } = useRepo();
+  } = useDojo();
 
   return (
     <Popover open={open} onOpenChange={setOpen} {...props}>

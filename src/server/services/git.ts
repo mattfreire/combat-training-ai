@@ -14,7 +14,7 @@ export const gitService = {
       await clonedRepo.pull()
     }
     return {
-      path,
+      sourcePath: path,
       sourceFolderName
     }
   },
@@ -22,7 +22,7 @@ export const gitService = {
     const match = gitUrl.match(/github\.com\/([^\/]+)\/([^\.]+)/);
     if (match) {
         const [, username, projectName] = match;
-        return `${username}_${projectName}`
+        return `${username}/${projectName}`
     } else {
         throw new Error('Invalid GitHub URL format');
     }

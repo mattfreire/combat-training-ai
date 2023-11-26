@@ -1,37 +1,48 @@
 import React, { type ReactNode } from "react";
-import { type Repository } from "@prisma/client";
+import { type File, type Repository } from "@prisma/client";
 import { AddRepoDialog } from "~/containers/repositories/AddRepo";
 
-interface RepoContextProps {
+interface DojoContextProps {
   repo: Repository | null;
+  file: File | null;
   setRepo: React.Dispatch<React.SetStateAction<Repository | null>>;
+  setFile: React.Dispatch<React.SetStateAction<File | null>>;
   openAddRepoDialog: () => void;
 }
 
-export const RepoContext = React.createContext<RepoContextProps>({
+export const DojoContext = React.createContext<DojoContextProps>({
   repo: null,
+  file: null,
   setRepo: () => null,
+  setFile: () => null,
   openAddRepoDialog: () => null,
 });
 
-export const RepoProvider = ({ children }: { children: ReactNode }) => {
+export const DojoProvider = ({ children }: { children: ReactNode }) => {
   const [repo, setRepo] = React.useState<Repository | null>(null);
+  const [file, setFile] = React.useState<File | null>(null);
   const [isOpen, onIsOpenChange] = React.useState(false);
 
   return (
-    <RepoContext.Provider
-      value={{ repo, setRepo, openAddRepoDialog: () => onIsOpenChange(true) }}
+    <DojoContext.Provider
+      value={{
+        repo,
+        setRepo,
+        openAddRepoDialog: () => onIsOpenChange(true),
+        file,
+        setFile,
+      }}
     >
       <AddRepoDialog isOpen={isOpen} onIsOpenChange={onIsOpenChange} />
       {children}
-    </RepoContext.Provider>
+    </DojoContext.Provider>
   );
 };
 
-const useRepoContext = () => React.useContext(RepoContext);
+const useDojoContext = () => React.useContext(DojoContext);
 
-export const useRepo = () => {
-  const context = useRepoContext();
+export const useDojo = () => {
+  const context = useDojoContext();
 
   // add a keyboard shortcut listener to open the add repo dialog
   React.useEffect(() => {

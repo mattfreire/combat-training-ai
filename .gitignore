@@ -44,5 +44,6 @@ yarn-error.log*
 volumes
 
 .vscode
+.idea
 
 tmp

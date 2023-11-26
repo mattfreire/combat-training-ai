@@ -7,7 +7,7 @@ import { api } from "~/utils/api";
 import "~/styles/globals.css";
 import { Toaster } from "~/components/ui/toaster";
 import { ThemeProvider } from "~/components/theme-provider";
-import { RepoProvider } from "~/context/repo";
+import { DojoProvider } from "~/context/repo";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
@@ -21,10 +21,10 @@ const MyApp: AppType<{ session: Session | null }> = ({
         enableSystem
         disableTransitionOnChange
       >
-        <RepoProvider>
+        <DojoProvider>
           <Toaster />
           <Component {...pageProps} />
-        </RepoProvider>
+        </DojoProvider>
       </ThemeProvider>
     </SessionProvider>
   );
