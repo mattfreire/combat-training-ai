@@ -38,23 +38,18 @@ client.defineJob({
     }
 
     await io.logger.info("Clone repo: ");
-    const { path, sourceFolderName } = await gitService.cloneRepo(payload.repoUrl);
-    await io.logger.info(`Completed cloning repo to ${path}`);
+    const { sourcePath, sourceFolderName } = await gitService.cloneRepo(payload.repoUrl);
+    await io.logger.info(`Completed cloning repo to ${sourcePath}`);
 
-    const bucketName = "repos"
-    try {
-      await minioService.createBucket(bucketName);
-    } catch (e) {
-      // bucket already exists
-    }
-    await minioService.uploadFolder(path, bucketName, sourceFolderName);
-    await io.logger.info(`Completed uploading repo to MinIO bucket ${bucketName}`);
+    await minioService.getOrCreateBucket();
+    await minioService.uploadFolder(sourcePath, sourceFolderName);
+    await io.logger.info(`Completed uploading repo to MinIO bucket`);
 
     // await embeddingService.createPartition(collectionName, sourceFolderName)
     // await io.logger.info(`Completed creating partition ${sourceFolderName}`);
 
-    await io.logger.info(`Getting all file paths from ${path}`);
-    const filePaths = minioService.getAllFilePaths(path, sourceFolderName)
+    await io.logger.info(`Getting all file paths from ${sourcePath}`);
+    const filePaths = minioService.getAllFilePaths(sourcePath, sourceFolderName)
     await io.logger.info(`Completed getting all file paths`);
 
     const fileObjs = filePaths.map((filePath) => {
@@ -67,9 +62,12 @@ client.defineJob({
 
     await db.file.createMany({
       data: fileObjs.map((fileObj) => {
+        const relativePath = fileObj.filePath.split("/tmp/repos/").pop() ?? ''
         return {
-          url: fileObj.filePath,
-          repoId: repository.id
+          url: relativePath,
+          repoId: repository.id,
+          name: fileObj.filePath.split("/").pop() ?? '',
+          relativePath,
         }
       })
     })
@@ -82,7 +80,7 @@ client.defineJob({
         // see here: https://milvus.io/docs/bulk_insert.md#2-Insert-entities
         rows.push({
           vector: embedding,
-          repo_id: 1,  // map to the ID in the repo table
+          repo_id: repository.id,
           file_id: 1,  // map to the ID in the file table
           content: "example",
           // content: chunk,  // always errors out that the content is too long
@@ -98,6 +96,5 @@ client.defineJob({
       return
     }
     
-    await io.logger.info(`Completed uploading repo to MinIO bucket ${bucketName}`);
   },
 });

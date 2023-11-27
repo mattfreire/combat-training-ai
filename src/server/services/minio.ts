@@ -11,18 +11,27 @@ export const minioClient = new Client({
   secretKey: env.MINIO_SECRET_KEY,
 })
 
+const bucketName = 'repos'
+const excludedFiles = ['.git', '.DS_Store']
 
 export const minioService = {
-  async createBucket(bucketName: string, region = 'us-east-1') {
+  async createBucket(region = 'us-east-1') {
     return await minioClient.makeBucket(bucketName, region)
   },
-  async uploadFile(bucketName: string, filePath: string, fileName: string) {
+  async getOrCreateBucket(region = 'us-east-1') {
+    try {
+      await minioClient.makeBucket(bucketName, region)
+    } catch (e) {
+      // Bucket already exists
+    }
+  },
+  async uploadFile(filePath: string, fileName: string) {
     const metaData = {
       'Content-Type': 'application/octet-stream',
     }
     return await minioClient.fPutObject(bucketName, fileName, filePath, metaData)
   },
-  async uploadManyFiles(bucketName: string, filePaths: string[]) {
+  async uploadManyFiles(filePaths: string[]) {
     const metaData = {
       'Content-Type': 'application/octet-stream',
     }
@@ -32,31 +41,36 @@ export const minioService = {
       return minioClient.fPutObject(bucketName, fileName, filePath, metaData)
     }))
   },
-  async uploadFolder(sourceFolder: string, bucketName: string, prefix: string) {
-    const files = fs.readdirSync(sourceFolder);
-  
-    for (const file of files) {
-      const filePath = path.join(sourceFolder, file);
-      const stats = fs.statSync(filePath);
-  
-      if (stats.isDirectory()) {
-        await this.uploadFolder(filePath, bucketName, path.join(prefix, file));
-      } else {
-        const objectName = path.join(prefix, path.relative(sourceFolder, filePath));
-        try {
-          await this.uploadFile(bucketName, filePath, objectName)
-          console.log(`Uploaded: ${objectName}`);
-        } catch (error) {
-          console.error(`Error uploading ${objectName}:`, error);
-        }
+  async uploadFolder(sourcePath: string, prefix: string) {
+    const files = fs.readdirSync(sourcePath);
+
+    const uploadPromises = files.map(async (file) => {
+      if (excludedFiles.includes(file)) {
+        return
       }
+
+      const filePath = path.join(sourcePath, file);
+      const stats = fs.statSync(filePath);
+
+      if (stats.isDirectory()) {
+        await this.uploadFolder(filePath, path.join(prefix, file));
+      } else {
+        const objectName = path.join(prefix, path.relative(sourcePath, filePath));
+        return this.uploadFile(filePath, objectName)
+          .then(() => console.log(`Uploaded: ${objectName}`));
+      }
+    });
+    try {
+      await Promise.all(uploadPromises);
+    } catch (error) {
+      console.error(`Error uploading files:`, error);
     }
   },
-  getAllFilePaths(sourceFolder: string, prefix: string): string[] {
-    const files = fs.readdirSync(sourceFolder);
+  getAllFilePaths(sourcePath: string, prefix: string): string[] {
+    const files = fs.readdirSync(sourcePath);
   
     const allFilePaths = files.map((file) => {
-      const filePath = path.join(sourceFolder, file);
+      const filePath = path.join(sourcePath, file);
       const stats = fs.statSync(filePath);
   
       if (stats.isDirectory()) {
@@ -69,12 +83,14 @@ export const minioService = {
     return allFilePaths.flat()
   },
   readFileLocal(filePath: string) {
-    return fs.readFileSync(filePath)
+    const localRoot = env.FILE_STORAGE_PATH
+    return fs.readFileSync(localRoot + filePath)
   },
-  async readFile(bucketName: string, fileName: string) {
+  async readFile(fileName: string) {
+    // This returns a stream
     return await minioClient.getObject(bucketName, fileName)
   },
-  printFiles(bucketName: string) {
+  printFiles() {
     const stream = minioClient.listObjectsV2(bucketName, '', true);
     stream.on('data', function (obj) {
       console.log(obj)

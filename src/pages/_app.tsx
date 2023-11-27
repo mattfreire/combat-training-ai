@@ -5,9 +5,9 @@ import { type AppType } from "next/app";
 import { api } from "~/utils/api";
 
 import "~/styles/globals.css";
-import { Layout } from "~/components/layout";
 import { Toaster } from "~/components/ui/toaster";
 import { ThemeProvider } from "~/components/theme-provider";
+import { DojoProvider } from "~/context/repo";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
@@ -21,10 +21,10 @@ const MyApp: AppType<{ session: Session | null }> = ({
         enableSystem
         disableTransitionOnChange
       >
-        <Layout>
+        <DojoProvider>
           <Toaster />
           <Component {...pageProps} />
-        </Layout>
+        </DojoProvider>
       </ThemeProvider>
     </SessionProvider>
   );

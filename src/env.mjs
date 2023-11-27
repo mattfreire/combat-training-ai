@@ -40,7 +40,9 @@ export const env = createEnv({
     MILVUS_ADDRESS: z.string(),
     MILVUS_USERNAME: z.string().optional(),
     MILVUS_PASSWORD: z.string().optional(),
-    OPENAI_API_KEY: z.string()
+    OPENAI_API_KEY: z.string(),
+    PINO_LOG_LEVEL: z.enum(["error", "fatal", "warn", "info", "debug", "trace"]),
+    FILE_STORAGE_PATH: z.string(),
   },
   /**
    * Specify your client-side environment variables schema here. This way you can ensure the app
@@ -72,7 +74,9 @@ export const env = createEnv({
     MILVUS_ADDRESS: process.env.MILVUS_ADDRESS,
     MILVUS_USERNAME: process.env.MILVUS_USERNAME,
     MILVUS_PASSWORD: process.env.MILVUS_PASSWORD,
-    OPENAI_API_KEY: process.env.OPENAI_API_KEY
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+    PINO_LOG_LEVEL: process.env.PINO_LOG_LEVEL,
+    FILE_STORAGE_PATH: process.env.FILE_STORAGE_PATH,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
