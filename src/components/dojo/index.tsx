@@ -1,5 +1,4 @@
-import { CounterClockwiseClockIcon } from "@radix-ui/react-icons";
-
+import { useChat } from "@axflow/models/react";
 import { Textarea } from "../ui/textarea";
 
 import { Button } from "../ui/button";
@@ -10,6 +9,35 @@ import { RepoSidebar } from "../RepoSidebar";
 import { useDojo } from "~/context/repo";
 import { ScrollArea } from "../ui/scroll-area";
 import { FileViewer } from "./containers/FileViewer";
+import { ChatBox } from "./components/chat-box";
+
+function ResponseRenderer() {
+  const { input, messages, onChange, onSubmit } = useChat({
+    url: "/api/chat",
+  });
+  return (
+    <form
+      className="flex h-full flex-col space-y-4"
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSubmit(e);
+      }}
+    >
+      <div className="h-full">
+        <ChatBox messages={messages} />
+      </div>
+      <Textarea
+        placeholder="Ask questions"
+        value={input}
+        onChange={onChange}
+        className="min-h-[100px] flex-1 p-4 outline-stone-200 focus:outline-stone-200 focus:ring-0"
+      />
+      <div className="flex items-center space-x-2">
+        <Button type="submit">Submit</Button>
+      </div>
+    </form>
+  );
+}
 
 export function Dojo() {
   const { data: repos, isLoading } = api.repo.getAll.useQuery();
@@ -34,10 +62,7 @@ export function Dojo() {
           <div className="container h-full py-6">
             <div className="grid h-full items-stretch gap-6 md:grid-cols-[1fr_300px]">
               <div className="hidden flex-col space-y-4 sm:flex md:order-2">
-                <Textarea
-                  placeholder="Ask questions"
-                  className="min-h-[400px] flex-1 p-4 outline-stone-200 focus:outline-stone-200 focus:ring-0 md:min-h-[700px] lg:min-h-[700px]"
-                />
+                <ResponseRenderer />
               </div>
               <div className="h-full w-full flex-1 flex-col">
                 <div className="flex h-full flex-col space-y-4">
@@ -48,13 +73,6 @@ export function Dojo() {
                       </ScrollArea>
                     )}
                     <FileViewer />
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Button>Submit</Button>
-                    <Button variant="secondary">
-                      <span className="sr-only">Show history</span>
-                      <CounterClockwiseClockIcon className="h-4 w-4" />
-                    </Button>
                   </div>
                 </div>
               </div>
